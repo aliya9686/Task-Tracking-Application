@@ -1,18 +1,13 @@
 const express = require("express");
-const pool = require("./db");
+
 require("dotenv").config();
+const taskRoute=require("./src/routes/taskRoute")
 
 const app = express();
 app.use(express.json());
 
-app.get("/tasks", async (req, res) => {
-  try {
-    const result = await pool.query("SELECT * FROM tasks ORDER BY id ASC");
-    res.json(result.rows);
-  } catch (error) {
-    console.error("Error fetching data", error.message);
-    res.status(500).json({ error: error.message });
-  }
-});
+//get all routes here
+app.use("/api",taskRoute);
+
 
 module.exports = app;
