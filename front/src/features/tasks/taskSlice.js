@@ -1,5 +1,7 @@
+// src/features/tasks/taskSlice.js
+
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchTasks, addTask, updateTask, deleteTask } from "./taskOperations";
+import { getAllTasks, createTask, updateTask, deleteTask } from "./taskThunks";
 
 const taskSlice = createSlice({
   name: "tasks",
@@ -7,39 +9,45 @@ const taskSlice = createSlice({
     list: [],
     loading: false,
     error: null,
+    filter: "all", 
   },
-  reducers: {},
+  reducers: {
+    setFilter(state, action) {
+      state.filter = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
-      //Using cases to fetch tasks
-      .addCase(fetchTasks.pending, (state) => {
+      .addCase(getAllTasks.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
-      .addCase(fetchTasks.fulfilled, (state, action) => {
+      .addCase(getAllTasks.fulfilled, (state, action) => {
         state.loading = false;
         state.list = action.payload;
       })
-      .addCase(fetchTasks.rejected, (state, action) => {
+      .addCase(getAllTasks.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       })
 
-      // to Add Task
-      .addCase(addTask.fulfilled, (state, action) => {
-        state.list.push(action.payload);
+      .addCase(createTask.fulfilled, (state, action) => {
+        if (action.payload) state.list.push(action.payload);
       })
 
-      // to  Update Task
       .addCase(updateTask.fulfilled, (state, action) => {
-        const index = state.list.findIndex((t) => t.id === action.payload.id);
-        if (index !== -1) state.list[index] = action.payload;
+        const updated = action.payload;
+        if (!updated) return;
+        const index = state.list.findIndex((t) => t.id === updated.id);
+        if (index !== -1) state.list[index] = updated;
       })
 
-      // to Delete Task
       .addCase(deleteTask.fulfilled, (state, action) => {
-        state.list = state.list.filter((task) => task.id !== action.payload);
+        const id = action.payload;
+        state.list = state.list.filter((t) => t.id !== id);
       });
   },
 });
 
+export const { setFilter } = taskSlice.actions;
 export default taskSlice.reducer;
