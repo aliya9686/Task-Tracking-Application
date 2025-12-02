@@ -1,7 +1,5 @@
-
-
 const { getAllTasks } = require("../service/taskService");
-const {getTaskById,deleteTaskById,addTaskService} = require("../service/taskService");
+const {getTaskById,deleteTaskById,addTaskService,updateByIdService} = require("../service/taskService");
 
 //get all task controller
 async function getTasks(req,res) {
@@ -67,31 +65,32 @@ async function addTask(req,res) {
     }
 }
 
+//too update by id
+async function updateById(req,res) {
+  const {id}=req.params;
 
-//to update by id]
-
-async function updateById(req,res){
-  const{id}=req.params;
-  try {
-    const { title, description, assigneeId, status, dueDate } = req.body;
-    const result=await updateByIdService({
-       title,
-        description,
-        assigneeId,
-        status,
-        dueDate,
-
-    })
     
-  } catch (error) {
-    
-  }
+    try { 
+        const result=await updateByIdService(req.body,id);
+        if(result.rowCount===0){
+            return res.status(404).json({ message: "Task not found" });
+        }
 
+        res.status(201).json({
+        message: "Task updated successfully",
+        task: result.rows[0]
+    });
 
+    } catch (error) {
+        console.error("error updating task :", error.message);
+        res.status(500).json({ error: error.message });
+    }    
 }
+
 module.exports={
     getTasks,
     getById,
     deleteById,
-    addTask
+    addTask,
+    updateById
 }
