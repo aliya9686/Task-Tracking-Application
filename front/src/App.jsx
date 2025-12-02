@@ -1,13 +1,12 @@
-function App() {
-  return (
-    <div className="p-10">
-      <h1 className="text-4xl font-bold text-blue-600">
-        Tailwind is working 🎉
-      </h1>
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import "./index.css";
+import { Provider } from "react-redux";
+import store from "./app/store";
 
-      <div className="w-20 h-20 bg-red-500 mt-4"></div>
-    </div>
-  );
-}
-
-export default App;
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <Provider store={store}>
+    <App />
+  </Provider>
+);

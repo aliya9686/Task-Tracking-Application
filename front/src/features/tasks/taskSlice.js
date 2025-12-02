@@ -31,13 +31,13 @@ const taskSlice = createSlice({
 
       // to  Update Task
       .addCase(updateTask.fulfilled, (state, action) => {
-        const index = state.list.findIndex(t => t.id === action.payload.id);
+        const index = state.list.findIndex((t) => t.id === action.payload.id);
         if (index !== -1) state.list[index] = action.payload;
       })
 
       // to Delete Task
       .addCase(deleteTask.fulfilled, (state, action) => {
-        state.list = state.list.filter(task => task.id !== action.payload);
+        state.list = state.list.filter((task) => task.id !== action.payload);
       });
   },
 });
