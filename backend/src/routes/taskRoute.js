@@ -12,6 +12,6 @@ router.delete("/tasks/:id",deleteById);
 //to add task
 router.post("/tasks",addTask);
 //to update task by id
-router.patch("/tasks/:id",updateById);
+router.put("/tasks/:id",updateById);
 
 module.exports=router;
