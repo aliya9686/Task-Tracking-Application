@@ -1,39 +1,38 @@
+// src/pages/TaskList.jsx
+
 import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { getAllTasks } from "../features/tasks/taskOperations";
+import { useTasks } from "../hooks/useTasks";
+import TaskFilter from "../components/TaskFilter";
+import TaskCard from "../components/TaskCard";
+import Loader from "../components/Loader";
+import EmptyState from "../components/EmptyState";
 
 const TaskList = () => {
   const dispatch = useDispatch();
-  const { list, loading, error } = useSelector((state) => state.tasks);
+  const { tasks, loading, error } = useTasks();
 
   useEffect(() => {
     dispatch(getAllTasks());
   }, [dispatch]);
 
-  if (loading)
-    return <p className="text-blue-600 text-center mt-6">Loading tasks...</p>;
-  if (error) return <p className="text-red-600 text-center mt-6">{error}</p>;
-  if (list.length === 0)
-    return <p className="text-gray-500 mt-6 text-center">No tasks found</p>;
+  if (loading) return <Loader />;
+  if (error) return <EmptyState message={error} />;
 
   return (
-    <div className="max-w-3xl mx-auto mt-6 p-4">
-      <h2 className="text-xl font-bold mb-4">Task List</h2>
+    <div className="max-w-3xl mx-auto">
+      <TaskFilter />
 
-      <ul className="space-y-3">
-        {list.map((task) => (
-          <li
-            key={task.id}
-            className="p-4 border rounded bg-white shadow hover:shadow-lg transition"
-          >
-            <h3 className="font-semibold text-lg">{task.title}</h3>
-            <p className="text-gray-600 text-sm">{task.description}</p>
-            <p className="text-sm mt-1">
-              Status: <span className="font-medium">{task.status}</span>
-            </p>
-          </li>
-        ))}
-      </ul>
+      {tasks.length === 0 ? (
+        <EmptyState message="No tasks found. Create one to get started." />
+      ) : (
+        <ul className="space-y-3">
+          {tasks.map((task) => (
+            <TaskCard key={task.id} task={task} />
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
