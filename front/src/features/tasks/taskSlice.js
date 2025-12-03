@@ -1,7 +1,7 @@
-// src/features/tasks/taskSlice.js
+
 
 import { createSlice } from "@reduxjs/toolkit";
-import { getAllTasks, createTask, updateTask, deleteTask } from "./taskThunks";
+import { getAllTasks, createTask, updateTask, deleteTask } from "./taskOperations";
 
 const taskSlice = createSlice({
   name: "tasks",

@@ -1,18 +1,23 @@
 const express = require("express");
-
+const cors = require("cors");
 require("dotenv").config();
 
-//routes
-const taskRoute=require("./src/routes/taskRoute")
+const taskRoute = require("./src/routes/taskRoute");
 
 const app = express();
+
+app.use(cors({
+  origin: ["http://localhost:5173"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type"],
+}));
+
 app.use(express.json());
 
-//get all routes here
+app.use("/api/tasks", taskRoute);
 
-app.use("/api",taskRoute);
-
-
-
+app.get("/", (req, res) => {
+  res.send("Server is ready");
+});
 
 module.exports = app;

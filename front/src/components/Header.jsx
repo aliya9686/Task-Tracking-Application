@@ -1,4 +1,3 @@
-// src/components/Header.jsx
 
 import { Link, useLocation } from "react-router-dom";
 
@@ -31,7 +30,7 @@ const Header = () => {
               : "bg-green-500 hover:bg-green-600"
           }`}
         >
-          + Add Task
+           Add Task
         </Link>
       </nav>
     </header>

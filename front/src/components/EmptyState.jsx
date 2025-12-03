@@ -1,4 +1,4 @@
-// src/components/EmptyState.jsx
+
 
 const EmptyState = ({ message = "No data available." }) => {
   return (

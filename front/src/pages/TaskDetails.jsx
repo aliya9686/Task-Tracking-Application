@@ -1,82 +1,78 @@
-// src/pages/TaskDetails.jsx
-
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { updateTask, deleteTask, getAllTasks } from "../features/tasks/taskThunks";
-import Loader from "../components/Loader";
-import EmptyState from "../components/EmptyState";
-import { formatDate } from "../utils/dateHelper";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  getAllTasks,
+  updateTask,
+  deleteTask,
+} from "../features/tasks/taskOperations";
 
 const TaskDetails = () => {
   const { id } = useParams();
-  const numericId = Number(id);
-
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const { list, loading } = useSelector((state) => state.tasks);
-  const taskData = list.find((t) => t.id === numericId);
+  const { list: tasks } = useSelector((state) => state.tasks);
+  const task = tasks.find((t) => t.id === Number(id));
 
-  const [task, setTask] = useState(taskData || null);
-
-  useEffect(() => {
-    if (!taskData) {
-      dispatch(getAllTasks());
-    }
-  }, [dispatch, taskData]);
+  const [status, setStatus] = useState(task?.status);
 
   useEffect(() => {
-    if (taskData) setTask(taskData);
-  }, [taskData]);
+    if (!task) dispatch(getAllTasks());
+  }, [task, dispatch]);
 
-  if (loading && !task) return <Loader />;
-  if (!task) return <EmptyState message="Task not found" />;
+  if (!task) return <p>Loading...</p>;
 
-  const handleStatusChange = async (e) => {
-    const updatedStatus = e.target.value;
-
-    const updatePayload = {
-      ...task,
-      status: updatedStatus,
-      assigneeId: task.assigneeid ?? task.assigneeId,
-      dueDate: task.duedate ?? task.dueDate,
-    };
-
-    await dispatch(updateTask({ id: numericId, data: updatePayload }));
+  const handleStatusChange = async (newStatus) => {
+  const updatedTask = {
+    ...task,
+    status: newStatus,
   };
 
-  const handleDelete = async () => {
-    await dispatch(deleteTask(numericId));
-    navigate("/");
+  try {
+    await dispatch(updateTask({ id: task.id, data: updatedTask })).unwrap();
+  } catch (error) {
+    console.error("Error updating:", error);
+  }
+};
+
+  const handleDelete = () => {
+    if (confirm("Are you sure?")) {
+      dispatch(deleteTask(id));
+      navigate("/");
+    }
   };
 
   return (
-    <div className="max-w-xl mx-auto bg-white p-6 rounded shadow">
-      <h2 className="text-2xl font-bold mb-2">{task.title}</h2>
-      <p className="text-gray-600 mb-4">{task.description}</p>
+    <div className="max-w-lg mx-auto mt-6 space-y-4">
+      <h2 className="text-2xl font-bold">{task.title}</h2>
+      <p className="text-gray-700">{task.description}</p>
 
-      <div className="space-y-3 text-sm text-gray-700">
-        <div><strong>Assignee ID:</strong> {task.assigneeid ?? task.assigneeId}</div>
-        <div><strong>Due Date:</strong> {formatDate(task.duedate ?? task.dueDate)}</div>
+      {/* Update Status */}
+      <div className="space-y-2">
+        <label>Status:</label>
+        <select
+          className="border p-2"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
+          <option value="pending">Pending</option>
+          <option value="in-progress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
 
-        <div>
-          <strong>Status:</strong>
-          <select
-            value={task.status}
-            onChange={handleStatusChange}
-            className="ml-2 border px-2 py-1 rounded"
-          >
-            <option value="pending">Pending</option>
-            <option value="in-progress">In Progress</option>
-            <option value="completed">Completed</option>
-          </select>
-        </div>
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+          onClick={handleStatusChange}
+        >
+          Update Status
+        </button>
       </div>
 
+      {/* Delete Task */}
       <button
+        className="bg-red-600 text-white px-4 py-2 rounded"
         onClick={handleDelete}
-        className="mt-6 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
       >
         Delete Task
       </button>

@@ -1,62 +1,60 @@
-const pool=require("../../db");
+const pool = require("../../db");
 
-//to get all tasks from db
+// Get all tasks
 async function getAllTasks() {
-    try {
-        const result=await pool.query("SELECT * FROM tasks ORDER BY id ASC");
-        return result.rows;
-        
-    } catch (error) {
-        console.error(error.message);
-        throw error;
-    }
+  const result = await pool.query("SELECT * FROM tasks ORDER BY id ASC");
+  return result.rows;
 }
 
-//to get task by id from db
-async function getTaskById(ids) {
-    try {
-        const tasks =await pool.query("SELECT * FROM tasks WHERE id=$1",[ids]);
-        return tasks.rows[0];
-    } catch (error) {
-        console.error(error.message);
-        throw error;
-    }    
+// Get task by ID
+async function getTaskById(id) {
+  const result = await pool.query("SELECT * FROM tasks WHERE id=$1", [id]);
+  return result.rows[0];
 }
 
-//to delete task by id
-async function deleteTaskById(ids) {
-
-    return await pool.query("DELETE FROM tasks WHERE id=$1",[ids]);
-           
+// Create task
+async function addTaskService(data) {
+  const { title, description, assigneeId, status, dueDate } = data;
+  const result = await pool.query(
+    "INSERT INTO tasks (title, description, assigneeId, status, dueDate) VALUES ($1,$2,$3,$4,$5) RETURNING *",
+    [title, description, assigneeId, status, dueDate]
+  );
+  return result.rows[0];
 }
 
-//to add task
-async function addTaskService(taskData) {
-    const { title, description, assigneeId, status, dueDate } = taskData;
-    return await pool.query(`INSERT INTO tasks (title, description, assigneeId, status, dueDate)
-    VALUES ($1, $2, $3, $4, $5)
-    RETURNING * `,[title,description,assigneeId,status,dueDate]
-);
+async function updateByIdService(id, data) {
+  const result = await pool.query(
+    `UPDATE tasks 
+     SET 
+      title = COALESCE($1, title),
+      description = COALESCE($2, description),
+      assigneeId = COALESCE($3, assigneeId),
+      status = COALESCE($4, status),
+      dueDate = COALESCE($5, dueDate)
+     WHERE id = $6
+     RETURNING *`,
+    [
+      data.title ?? null,
+      data.description ?? null,
+      data.assigneeId ?? data.assigneeid ?? null,
+      data.status ?? null,
+      data.dueDate ?? data.duedate ?? null,
+      id
+    ]
+  );
+
+  return result.rows[0];
 }
 
-//to update by id
-async function updateByIdService(taskData,id) {
-    const { title, description, assigneeId, status, dueDate } = taskData;
-    return await pool.query(`UPDATE tasks
-         SET title = $1,
-         description = $2,
-         assigneeId = $3,
-         status = $4,
-         dueDate = $5
-         WHERE id = $6
-         RETURNING * `,
-         [title, description, assigneeId, status, dueDate, id]
-        );
+// Delete task
+async function deleteTaskById(id) {
+  return await pool.query("DELETE FROM tasks WHERE id=$1", [id]);
 }
-module.exports={
-    getAllTasks,
-    getTaskById,
-    deleteTaskById,
-    addTaskService,
-    updateByIdService
-}
+
+module.exports = {
+  getAllTasks,
+  getTaskById,
+  addTaskService,
+  updateByIdService,
+  deleteTaskById,
+};
